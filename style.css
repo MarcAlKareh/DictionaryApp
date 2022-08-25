@@ -83,14 +83,14 @@ body {
 
 .error {
   display: flex;
-  margin-top: 110px;
+  margin-top: 100px;
+  margin-left: 110px;
 }
 
 .icon-error {
   width: 30px;
   height: 30px;
   stroke: #40c057;
-  margin-left: 100px;
   margin-right: 40px;
 }
 
