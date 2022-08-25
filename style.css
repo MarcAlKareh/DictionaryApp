@@ -80,3 +80,22 @@ body {
   padding-left: 10px;
   border-left: 5px solid #40c057;
 }
+
+.error {
+  display: flex;
+  margin-top: 110px;
+}
+
+.icon-error {
+  width: 30px;
+  height: 30px;
+  stroke: #40c057;
+  margin-left: 100px;
+  margin-right: 40px;
+}
+
+.error-message {
+  font-size: 20px;
+  font-family: 'Poppins', sans-serif;
+  color: #868e96;
+}
