@@ -2,6 +2,13 @@ const mainContainer = document.querySelector('.main-container');
 const searchInput = document.querySelector('.search-input');
 const searchButton = document.querySelector('.search-button');
 
+const clearMainContainer = function () {
+  const wordContainer = document.querySelector('.word-container');
+  const errorEl = document.querySelector('.error');
+  if (wordContainer) mainContainer.removeChild(wordContainer);
+  if (errorEl) mainContainer.removeChild(errorEl);
+};
+
 const renderErrorMessage = function (errorMessage) {
   const errorMarkup = `
     <div class="error">
@@ -23,11 +30,9 @@ const renderErrorMessage = function (errorMessage) {
     </div>
   `;
 
-  const wordContainer = document.querySelector('.word-container');
-  const errorEl = document.querySelector('.error');
-  if (wordContainer || errorEl) mainContainer.removeChild(wordContainer);
+  clearMainContainer();
 
-  // Add error message to screen
+  // Render error message to screen
   mainContainer.insertAdjacentHTML('beforeend', errorMarkup);
 };
 
@@ -38,7 +43,7 @@ const getWordData = async function (wrd) {
       `https://api.dictionaryapi.dev/api/v2/entries/en/${wrd}`
     );
 
-    console.log(res);
+    // console.log(res);
     if (!res.ok) throw new Error('Could not find word');
 
     return res.json();
@@ -48,18 +53,53 @@ const getWordData = async function (wrd) {
   }
 };
 
-const renderSearchResult = function () {
+const generateMarkup = function (wrdData) {
+  if (!wrdData.sentenceExample) {
+    return `
+    <div class="word-container">
+      <h2 class="word">${wrdData.word}</h2>
+      <p class="word-type-pronunciation">${wrdData.partOfSpeech} ${wrdData.pronunciation}</p>
+      <p class="word-definition">${wrdData.definition}</p>
+    </div>
+  `;
+  }
+
+  return `
+    <div class="word-container">
+      <h2 class="word">${wrdData.word}</h2>
+      <p class="word-type-pronunciation">${wrdData.partOfSpeech} ${wrdData.pronunciation}</p>
+      <p class="word-definition">${wrdData.definition}</p>
+      <p class="word-example">${wrdData.sentenceExample}</p>
+    </div>
+  `;
+};
+
+const renderSearchResult = async function () {
   const word = searchInput.value;
 
   if (!word) return;
 
   // Make request to API with the inputted word
-  getWordData(word);
+  const [data] = await getWordData(word);
+  // console.log(data);
+  const wordData = {
+    word: data.word,
+    definition: data.meanings[0].definitions[0].definition,
+    partOfSpeech: data.meanings[0].partOfSpeech,
+    sentenceExample: data.meanings[0].definitions[0].example,
+    pronunciation: data.phonetics.find(obj => obj.text).text,
+    audioUrl: data.phonetics.find(obj => obj.text).audio,
+  };
+  // console.log(wordData.sentenceExample);
+
+  clearMainContainer();
+
+  // Render data about word
+  const wordMarkup = generateMarkup(wordData);
+  mainContainer.insertAdjacentHTML('beforeend', wordMarkup);
 
   // Clear search input field
   searchInput.value = '';
-
-  console.log(word);
 };
 
 searchButton.addEventListener('click', renderSearchResult);
